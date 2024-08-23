@@ -3,10 +3,14 @@ const { StatusCodes } = require("http-status-codes");
 const { BadRequestError, UnauthenticatedError } = require("../errors");
 
 const register = async (req, res) => {
-  const user = await User.create({ ...req.body });
-  const token = user.createJWT();
-
-  res.status(StatusCodes.CREATED).json({ user: { name: user.name }, token });
+  try {
+    const user = await User.create({ ...req.body });
+    const token = user.createJWT();
+    res.status(StatusCodes.CREATED).json({ user: { name: user.name ,token: token } });
+  } catch (error) {
+    console.error('Error creating user or generating token:', error);
+    res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ msg: 'Error registering user' });
+  }
 };
 
 const login = async (req, res) => {
@@ -29,7 +33,7 @@ const login = async (req, res) => {
   // compare password
 
   const token = user.createJWT();
-  res.status(StatusCodes.OK).json({ user: { name: user.name }, token });
+  res.status(StatusCodes.OK).json({ user: { name: user.name, token: token }});
 };
 
 module.exports = {
